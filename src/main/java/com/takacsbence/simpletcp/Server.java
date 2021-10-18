@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Server {
 
-    private Map<Socket, DataOutputStream> outputStreamsMap = new HashMap<>();
+    private final Map<Socket, DataOutputStream> outputStreamsMap = new HashMap<>();
 
     public Server(int port) throws IOException {
         listen(port);
@@ -29,8 +29,18 @@ public class Server {
     }
 
     public void removeConnection(Socket socket) {
-        if (socket != null) {
-            outputStreamsMap.remove(socket);
+        synchronized (outputStreamsMap) {
+            if (socket != null) {
+                outputStreamsMap.remove(socket);
+            }
+
+            try {
+                if (socket != null) {
+                    socket.close();
+                }
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
