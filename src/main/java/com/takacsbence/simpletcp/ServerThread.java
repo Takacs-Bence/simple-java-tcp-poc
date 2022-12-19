@@ -31,7 +31,6 @@ public class ServerThread extends Thread {
         } catch (EOFException ignore) {
         } catch (IOException ie) {
             ie.printStackTrace();
-        } finally {
             server.removeConnection(socket);
         }
     }

@@ -21,8 +21,7 @@ public class Client implements Runnable {
         din = new DataInputStream(socket.getInputStream());
         dout = new DataOutputStream(socket.getOutputStream());
 
-        new ClientThread(this).start();
-        new Thread(this).start();
+        new ClientThread(this);
     }
 
     @Override
@@ -37,7 +36,7 @@ public class Client implements Runnable {
         }
     }
 
-    public void processMessage(String message) {
+    public synchronized void processMessage(String message) {
         try {
             dout.writeUTF(message);
         } catch (IOException e) {

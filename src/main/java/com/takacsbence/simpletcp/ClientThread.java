@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 public class ClientThread extends Thread {
 
-    private Client client;
+    private final Client client;
 
     public ClientThread(Client client) {
         this.client = client;
