@@ -13,9 +13,13 @@ public class ClientThread extends Thread {
 
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println("input message from client: " + input);
-        client.processMessage(input);
+        while (true) {
+            Scanner scanner = new Scanner(System.in);
+            String input = scanner.nextLine();
+            if (!input.isEmpty()) {
+                System.out.println("input message from client: " + input);
+                client.processMessage(input);
+            }
+        }
     }
 }
