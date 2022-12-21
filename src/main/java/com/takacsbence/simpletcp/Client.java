@@ -2,6 +2,7 @@ package com.takacsbence.simpletcp;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -22,6 +23,7 @@ public class Client implements Runnable {
         dout = new DataOutputStream(socket.getOutputStream());
 
         new ClientThread(this);
+        new Thread(this).start();
     }
 
     @Override
@@ -29,18 +31,22 @@ public class Client implements Runnable {
         try {
             while (true) {
                 String message = din.readUTF();
-                System.out.println(socket + " received a message: " + message);
+                if (!message.isEmpty()) {
+                    System.out.println(socket + " received a message: " + message);
+                }
             }
-        } catch (IOException e) {
+        } catch (EOFException ignore) {/* is not a problem*/} catch (Exception e) {
             e.printStackTrace();
+            throw new IllegalStateException(e.getMessage());
         }
     }
 
-    public synchronized void processMessage(String message) {
+    public void processMessage(String message) {
         try {
             dout.writeUTF(message);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            throw new IllegalStateException(e.getMessage());
         }
     }
 }

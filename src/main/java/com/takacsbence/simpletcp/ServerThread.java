@@ -2,13 +2,12 @@ package com.takacsbence.simpletcp;
 
 import java.io.DataInputStream;
 import java.io.EOFException;
-import java.io.IOException;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
 
-    private Server server;
-    private Socket socket;
+    private final Server server;
+    private final Socket socket;
 
     public ServerThread(Server server, Socket socket) {
         this.server = server;
@@ -25,14 +24,13 @@ public class ServerThread extends Thread {
             while (true) {
                 String message = din.readUTF();
                 System.out.println("Sending message with content: " + message);
-                server.sendToAll(message);
+                server.sendToAll(socket, message);
             }
 
         } catch (EOFException ignore) {
-        } catch (IOException ie) {
-            ie.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             server.removeConnection(socket);
         }
     }
-
 }
