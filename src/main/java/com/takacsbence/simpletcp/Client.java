@@ -21,7 +21,7 @@ public class Client implements Runnable {
         } catch (IOException ie) {
             ie.printStackTrace();
         }
-        System.out.println("client connected to server on socket: " + socket);
+        System.out.printf("client connected to server on socket: %s with username: %s%n", socket, userName);
         din = new DataInputStream(socket.getInputStream());
         dout = new DataOutputStream(socket.getOutputStream());
 
