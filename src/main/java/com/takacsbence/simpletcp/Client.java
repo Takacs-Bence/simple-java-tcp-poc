@@ -12,7 +12,10 @@ public class Client implements Runnable {
     DataInputStream din;
     DataOutputStream dout;
 
-    public Client(String host, int port) throws IOException {
+    private final MessageParser messageParser;
+
+    public Client(String host, int port, String userName) throws IOException {
+        messageParser = new TerminalMessageParser();
         try {
             socket = new Socket(host, port);
         } catch (IOException ie) {
@@ -22,7 +25,7 @@ public class Client implements Runnable {
         din = new DataInputStream(socket.getInputStream());
         dout = new DataOutputStream(socket.getOutputStream());
 
-        new ClientThread(this);
+        new ClientThread(this, userName);
         new Thread(this).start();
     }
 
@@ -32,7 +35,8 @@ public class Client implements Runnable {
             while (true) {
                 String message = din.readUTF();
                 if (!message.isEmpty()) {
-                    System.out.println(socket + " received a message: " + message);
+                    Message msg = messageParser.parseMessage(message);
+                    System.out.println(messageParser.prettyPrint(msg));
                 }
             }
         } catch (EOFException ignore) {/* is not a problem*/} catch (Exception e) {
@@ -41,9 +45,9 @@ public class Client implements Runnable {
         }
     }
 
-    public void processMessage(String message) {
+    public void processMessage(Message message) {
         try {
-            dout.writeUTF(message);
+            dout.writeUTF(messageParser.parseMessage(message));
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalStateException(e.getMessage());

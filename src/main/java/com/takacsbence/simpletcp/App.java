@@ -12,8 +12,9 @@ public class App {
             if (appMode == AppMode.SERVER) {
                 new Server(port);
             } else if (appMode == AppMode.CLIENT) {
+                String name = args[1];
                 String host = "0.0.0.0";
-                new Client(host, port);
+                new Client(host, port, name);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
