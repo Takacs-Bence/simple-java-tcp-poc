@@ -1,7 +1,6 @@
 package com.takacsbence.simpletcp;
 
 import java.io.DataInputStream;
-import java.io.EOFException;
 import java.net.Socket;
 
 public class ServerThread extends Thread {
@@ -27,7 +26,6 @@ public class ServerThread extends Thread {
                 server.sendToAll(socket, message);
             }
 
-        } catch (EOFException ignore) {
         } catch (Exception ex) {
             ex.printStackTrace();
             server.removeConnection(socket);
