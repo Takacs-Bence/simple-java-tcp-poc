@@ -28,13 +28,15 @@ public class Server {
     }
 
     public synchronized void removeConnection(Socket socket) {
-        if (socket != null) {
-            outputStreamsMap.remove(socket);
-        }
         try {
+
             if (socket != null) {
+                synchronized (outputStreamsMap) {
+                    outputStreamsMap.remove(socket);
+                }
                 socket.close();
             }
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
