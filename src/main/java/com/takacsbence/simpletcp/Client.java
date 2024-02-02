@@ -15,18 +15,21 @@ public class Client implements Runnable {
     private final MessageParser messageParser;
 
     public Client(String host, int port, String userName) throws IOException {
-        messageParser = new TerminalMessageParser();
+		messageParser = new TerminalMessageParser();
         try {
             socket = new Socket(host, port);
         } catch (IOException ie) {
             ie.printStackTrace();
         }
-        System.out.printf("client connected to server on socket: %s with username: %s%n", socket, userName);
         din = new DataInputStream(socket.getInputStream());
         dout = new DataOutputStream(socket.getOutputStream());
 
         new ClientThread(this, userName);
         new Thread(this).start();
+
+        validate_username(userName);
+
+        System.out.printf("client connected to server on socket: %s with username: %s%n", socket, userName);
     }
 
     @Override
@@ -40,7 +43,6 @@ public class Client implements Runnable {
                 }
             }
         } catch (EOFException ignore) {/* is not a problem*/} catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalStateException(e.getMessage());
         }
     }
@@ -49,8 +51,16 @@ public class Client implements Runnable {
         try {
             dout.writeUTF(messageParser.parseMessage(message));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalStateException(e.getMessage());
         }
     }
+
+	private void validate_username(String userName) {
+		try {
+			dout.writeUTF("CMD|username|" + userName);
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage());
+		}
+	}
+
 }
