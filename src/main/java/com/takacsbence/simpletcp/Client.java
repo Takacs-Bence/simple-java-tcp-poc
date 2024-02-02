@@ -1,10 +1,15 @@
 package com.takacsbence.simpletcp;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.KeyStore;
 
 public class Client implements Runnable {
 
@@ -16,20 +21,46 @@ public class Client implements Runnable {
 
     public Client(String host, int port, String userName) throws IOException {
 		messageParser = new TerminalMessageParser();
-        try {
-            socket = new Socket(host, port);
-        } catch (IOException ie) {
-            ie.printStackTrace();
+		boolean created = true;
+
+		try {
+            createSSLSocket(host, port);
+        } catch (Exception e) {
+            System.err.println("client with username: " + userName + " won't start due to error. " + e.getMessage());
+            created = false;
         }
-        din = new DataInputStream(socket.getInputStream());
-        dout = new DataOutputStream(socket.getOutputStream());
 
-        new ClientThread(this, userName);
-        new Thread(this).start();
+        if (created) {
+            din = new DataInputStream(socket.getInputStream());
+            dout = new DataOutputStream(socket.getOutputStream());
 
-        validate_username(userName);
+            new ClientThread(this, userName);
+            new Thread(this).start();
 
-        System.out.printf("client connected to server on socket: %s with username: %s%n", socket, userName);
+            validate_username(userName);
+
+            System.out.printf("client connected to server on socket: %s with username: %s%n", socket, userName);
+        }
+    }
+
+    private void createSSLSocket(String host, int port) throws Exception {
+        String trustStorePath = AppConfig.getProperty("server.ssl.trust-store");
+        String trustStorePassword = AppConfig.getProperty("server.ssl.trust-store-password");
+
+        final char[] password = trustStorePassword.toCharArray();
+
+        // Load truststore with the CA's public key
+        KeyStore truststore = KeyStore.getInstance("PKCS12");
+        truststore.load(new FileInputStream(trustStorePath), password);
+
+        TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        trustManagerFactory.init(truststore);
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustManagerFactory.getTrustManagers(), null);
+
+        SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+        socket = sslSocketFactory.createSocket(host, port);
     }
 
     @Override

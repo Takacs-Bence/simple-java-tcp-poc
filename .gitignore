@@ -1,2 +1,6 @@
 target
 .idea
+keystore.p12
+server.crt
+truststore.p12
+keystore.p12
