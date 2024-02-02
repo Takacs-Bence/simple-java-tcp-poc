@@ -8,7 +8,7 @@ public class App {
     public static void main(String[] args) {
         try {
             AppMode appMode = AppMode.valueOf(args[0]);
-            int port = 5001;
+            int port = Integer.parseInt(AppConfig.getProperty("port"));
             if (appMode == AppMode.SERVER) {
                 new Server(port);
             } else if (appMode == AppMode.CLIENT) {
